@@ -1,22 +1,24 @@
-name: deploy_to_firebase_hosting
+name: Deploy to Live Channel
 
 on:
   push:
-    tags:
-      - release-production-*
+    branches:
+      - master
 
 jobs:
-  deploy_to_firebase_hosting:
-
+  build_and_preview:
     runs-on: ubuntu-latest
-    
     steps:
-      - name: Checkout the repository
-        uses: actions/checkout@master
-      
-      - name: Deploy to Firebase
-        uses: w9jds/firebase-action@master
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
         with:
-          args: deploy --only hosting
-        env:
-          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+          node-version: '12'
+      - run: npm install
+      - run: npm run build
+      - uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: "${{ secrets.GITHUB_TOKEN }}"
+          firebaseServiceAccount: "${{ secrets.FIREBASE_SERVICE_ACCOUNT }}"
+          expires: 30d
+          projectId: fir-sample-b5510
+          channelId: live
